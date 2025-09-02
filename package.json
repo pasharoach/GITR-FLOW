@@ -1,0 +1,112 @@
+{
+  "name": "gitr-flow",
+  "version": "6.0.0",
+  "description": "ГИТР FLOW - Desktop application for grading Moodle assignments with file preview and comments",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "dist": "npm run build"
+  },
+  "keywords": [
+    "moodle",
+    "grading",
+    "assignments",
+    "education",
+    "electron",
+    "desktop-app"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.6.4"
+  },
+  "build": {
+    "appId": "com.gitr.flow",
+    "productName": "ГИТР FLOW",
+    "icon": "assets/icon.icns",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "renderer/**/*",
+      "main.js",
+      "preload.js",
+      "assets/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/icon.icns",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "entitlements": null,
+      "entitlementsInherit": null,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 400,
+          "type": "file",
+          "path": "./GATEKEEPER_BYPASS_INSTRUCTIONS.txt"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 500
+      }
+    },
+    "win": {
+      "icon": "assets/icon-large.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ГИТР FLOW"
+    }
+  },
+  "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
+    "canvas": "^3.1.2",
+    "mammoth": "^1.10.0",
+    "pdfjs-dist": "^5.4.54"
+  }
+}
