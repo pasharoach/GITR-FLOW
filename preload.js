@@ -1,4 +1,11 @@
 const { contextBridge, ipcRenderer } = require('electron');
+// Expose needed Node libs for renderer (safe via contextIsolation)
+let mammothLib = null;
+try {
+  mammothLib = require('mammoth');
+} catch (e) {
+  // keep null if not available; renderer will handle
+}
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // Заметки
@@ -37,3 +44,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   downloadFileToFolder: (fileUrl, fileName, studentName, downloadFolder, moodleToken) => 
     ipcRenderer.invoke('download-file-to-folder', fileUrl, fileName, studentName, downloadFolder, moodleToken)
 }); 
+
+// Expose libraries to renderer safely
+contextBridge.exposeInMainWorld('libs', {
+  mammoth: mammothLib
+});

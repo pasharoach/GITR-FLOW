@@ -222,6 +222,8 @@
         /* Sidebar */
         .sidebar {
             width: 320px;
+            min-width: 320px;
+            max-width: 320px;
             background: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
@@ -229,6 +231,7 @@
             position: relative;
             z-index: 10;
             -webkit-app-region: no-drag;
+            flex-shrink: 0;
         }
         
         .sidebar-header {
@@ -849,6 +852,7 @@
 
 
         /* Main Content */
+        /* Main Content */
         .main-area {
             flex: 1;
             display: flex;
@@ -856,6 +860,8 @@
             background: var(--bg-primary);
             position: relative;
             -webkit-app-region: no-drag;
+            min-width: 0;
+            overflow: hidden;
         }
         
         .editor-header {
@@ -1758,14 +1764,18 @@
             display: flex;
             flex: 1;
             overflow: hidden;
+            min-width: 0;
         }
 
         .students-sidebar {
             width: 300px;
+            min-width: 300px;
+            max-width: 300px;
             border-right: 1px solid var(--border-color);
             background: var(--bg-secondary);
             overflow-y: auto;
             margin-top: 1px; /* Отступ от глобальной линии */
+            flex-shrink: 0;
         }
 
         .students-search {
@@ -1800,7 +1810,7 @@
         .filter-buttons {
             display: flex;
             gap: 6px;
-            flex-wrap: nowrap;
+            flex-wrap: wrap;
         }
 
         .filter-btn {
@@ -1812,20 +1822,57 @@
             font-size: 11px;
             font-weight: 500;
             cursor: pointer;
-            transition: var(--transition);
+            transition: all 0.2s ease-in-out;
             white-space: nowrap;
-            flex: 1;
+            flex: 0 1 auto;
+            min-width: 60px;
         }
 
         .filter-btn:hover {
             background: var(--bg-tertiary);
             border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .filter-btn.active {
             background: var(--primary-color);
             color: white;
             border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .filter-btn.active[data-filter="submitted"] {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+        }
+
+        .filter-btn.active[data-filter="not-graded"] {
+            background: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+
+        .filter-btn.active[data-filter="all"] {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .filter-btn.active[data-filter="submitted"]:hover {
+            background: #059669;
+            border-color: #059669;
+        }
+
+        .filter-btn.active[data-filter="not-graded"]:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .filter-btn.active[data-filter="all"]:hover {
+            background: #2563eb;
+            border-color: #2563eb;
         }
 
         .student-list-item {
@@ -1928,6 +1975,8 @@
             display: flex;
             flex-direction: column;
             background: var(--bg-card);
+            min-width: 0;
+            overflow: hidden;
         }
 
         .student-detail-header {
@@ -1971,6 +2020,8 @@
             flex: 1;
             padding: 24px;
             overflow-y: auto;
+            min-width: 0;
+            word-wrap: break-word;
         }
 
         .no-student-selected {
@@ -2081,6 +2132,8 @@
         .file-preview-video-container,
         .file-preview-audio-container,
         .file-preview-pdf-container,
+        .file-preview-word-container,
+        .file-preview-text-container,
         .file-preview-download {
             position: relative;
             width: 100px;
@@ -2100,36 +2153,26 @@
         .file-preview-video-container:hover,
         .file-preview-audio-container:hover,
         .file-preview-pdf-container:hover,
+        .file-preview-word-container:hover,
+        .file-preview-text-container:hover,
         .file-preview-download:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
             background: var(--bg-hover);
         }
         
-        .file-preview-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-        
-        .file-preview-play-button {
-            font-size: 24px;
-            color: white;
-        }
+
         
         .file-preview-pdf-icon,
+        .file-preview-word-icon,
+        .file-preview-text-icon,
         .file-preview-file-icon {
             font-size: 32px;
             margin-bottom: 8px;
         }
         
         .file-preview-pdf-name,
+        .file-preview-word-name,
+        .file-preview-text-name,
         .file-preview-file-name {
             font-size: 10px;
             text-align: center;
@@ -2304,7 +2347,23 @@
             height: 70vh;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            background: white;
+            background: #1e1e1e;
+        }
+
+        .file-preview-large-word {
+            width: 100%;
+            height: 70vh;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            background: #1e1e1e;
+        }
+
+        .file-preview-large-text {
+            width: 100%;
+            height: 70vh;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            background: #1e1e1e;
         }
         
         .file-preview-large-video {
@@ -2409,37 +2468,221 @@
         .grading-form {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 16px;
+            gap: 20px;
+            padding: 20px;
             background: var(--bg-secondary);
             border-radius: var(--radius-lg);
             border: 1px solid var(--border-color);
             flex-wrap: wrap;
-            max-width: 100%;
+            width: 100%;
             box-sizing: border-box;
             margin-top: 16px;
+            min-width: 0;
+            overflow: hidden;
         }
         
         .grading-input-group {
             display: flex;
             align-items: center;
-            gap: 8px;
-            min-width: 120px;
             flex-shrink: 0;
+            min-width: 0;
+            overflow: hidden;
         }
         
         .grading-input-group.grade-group {
             flex-shrink: 0;
+            min-width: 120px;
+            max-width: 140px;
         }
         
         .grading-input-group.comment-group {
-            flex: 1;
-            min-width: 200px;
+            flex: 0 1 auto;
+            min-width: 100px;
+            max-width: 200px;
+            overflow: hidden;
         }
         
         .grading-button-group {
-            margin-left: auto;
             flex-shrink: 0;
+            min-width: 140px;
+            max-width: 160px;
+            min-width: 0;
+            overflow: hidden;
+            margin-left: auto;
+        }
+
+        .grading-button-group .btn {
+            white-space: nowrap;
+            width: 100%;
+            height: 40px;
+            padding: 8px 16px;
+            box-sizing: border-box;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 768px) {
+            .grading-form {
+                flex-direction: column;
+                gap: 12px;
+                padding: 16px;
+                overflow-x: visible;
+            }
+            
+            .grading-input-group.grade-group {
+                min-width: 100%;
+                max-width: 100%;
+            }
+            
+            .grading-input-group.comment-group {
+                min-width: 100%;
+                max-width: 100%;
+            }
+            
+            .grading-button-group {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .grading-button-group .btn {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+
+        /* Адаптивность для планшетов */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .grading-form {
+                gap: 12px;
+                padding: 16px;
+                flex-wrap: wrap;
+            }
+            
+            .grading-input-group.grade-group {
+                min-width: 120px;
+                max-width: 140px;
+            }
+            
+            .grading-input-group.comment-group {
+                min-width: 125px;
+                max-width: 175px;
+            }
+            
+            .grading-button-group {
+                min-width: 140px;
+                max-width: 160px;
+            }
+        }
+
+        /* Адаптивность для больших экранов */
+        @media (min-width: 1025px) {
+            .grading-form {
+                gap: 20px;
+                padding: 24px;
+            }
+            
+            .grading-input-group.comment-group {
+                min-width: 175px;
+                max-width: 250px;
+            }
+            
+            .grading-button-group {
+                min-width: 180px;
+            }
+        }
+
+        /* Адаптивность для очень больших экранов */
+        @media (min-width: 1440px) {
+            .grading-form {
+                gap: 24px;
+                padding: 28px;
+            }
+            
+            .grading-input-group.comment-group {
+                min-width: 200px;
+                max-width: 300px;
+            }
+            
+            .grading-button-group {
+                min-width: 200px;
+            }
+        }
+
+        /* Адаптивность для очень маленьких экранов */
+        @media (max-width: 480px) {
+            .grading-form {
+                gap: 8px;
+                padding: 12px;
+            }
+            
+            .grading-input-group {
+                min-width: 100%;
+            }
+            
+            .grading-input-group.comment-group {
+                min-width: 100%;
+                max-width: 100%;
+            }
+            
+            .grading-button-group {
+                margin-left: 0;
+                width: 100%;
+                min-width: 100%;
+            }
+            
+            .grading-button-group .btn {
+                width: 100%;
+                min-width: 100%;
+            }
+        }
+
+        /* Адаптивность для средних экранов */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .grading-form {
+                gap: 10px;
+                padding: 14px;
+                flex-wrap: wrap;
+            }
+            
+            .grading-input-group.grade-group {
+                min-width: 100px;
+                max-width: 120px;
+            }
+            
+            .grading-input-group.comment-group {
+                min-width: 100px;
+                max-width: 150px;
+            }
+            
+            .grading-button-group {
+                min-width: 120px;
+                max-width: 140px;
+            }
+        }
+
+        /* Адаптивность для средних экранов */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .grading-form {
+                gap: 14px;
+                padding: 18px;
+                flex-wrap: wrap;
+            }
+            
+            .grading-input-group.grade-group {
+                min-width: 120px;
+                max-width: 140px;
+            }
+            
+            .grading-input-group.comment-group {
+                min-width: 280px;
+                max-width: 380px;
+            }
+            
+            .grading-button-group {
+                min-width: 150px;
+                max-width: 160px;
+            }
         }
         
 
@@ -2449,10 +2692,18 @@
             font-weight: 500;
             color: var(--text-primary);
             white-space: nowrap;
+            min-width: 90px;
+            flex-shrink: 0;
+            text-align: right;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            height: 100%;
         }
         
         .grade-input {
-            width: 80px;
+            width: 100%;
+            height: 40px;
             padding: 8px 12px;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-sm);
@@ -2460,6 +2711,9 @@
             color: var(--text-primary);
             font-size: 14px;
             text-align: center;
+            box-sizing: border-box;
+            min-width: 0;
+            flex-shrink: 0;
         }
         
         .comment-input {
@@ -2473,6 +2727,8 @@
             font-family: inherit;
             height: 40px;
             transition: var(--transition);
+            box-sizing: border-box;
+            min-width: 0;
             flex: 1;
         }
         
@@ -2488,17 +2744,54 @@
             align-items: center;
             justify-content: center;
             height: 200px;
-            color: var(--text-muted);
+            color: #888888;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            margin-bottom: 16px;
         }
 
         .no-submission-icon {
             font-size: 48px;
             margin-bottom: 16px;
+            color: var(--text-secondary);
         }
 
         .no-submission-text {
             font-size: 16px;
             text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .no-submission-content + .grading-form,
+        .grading-form.no-submission-grading {
+            margin-top: 20px;
+            border-left: 4px solid var(--error-color);
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-md);
+            padding: 16px;
+        }
+        
+        .grading-form.no-submission-grading .grading-input-group label {
+            color: var(--error-color);
+            font-weight: 600;
+        }
+
+
+
+
+
+        .no-submission-content + .grading-form {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .no-submission-content + .grading-form * {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .no-submission-content + .grading-form * * {
+            transition: all 0.2s ease-in-out;
         }
 
         .student-detail-grading {
@@ -2588,12 +2881,15 @@
             display: flex;
             align-items: center;
             gap: 16px;
+            flex-wrap: wrap;
         }
         
         .grading-input-group {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex: 1;
+            min-width: 200px;
         }
         
         .grading-input-group label {
@@ -2637,14 +2933,14 @@
             border: 1px solid var(--border-color);
             border-radius: var(--radius-md);
             overflow: hidden;
-            background: var(--bg-secondary);
+            background: #1e1e1e;
         }
 
         .file-preview-pdf {
             width: 100%;
             height: 100%;
             border: none;
-            background: white;
+            background: #1e1e1e;
         }
 
         .file-preview-word-container {
@@ -2654,21 +2950,33 @@
             justify-content: center;
             padding: 40px;
             text-align: center;
-            background: var(--bg-secondary);
+            background: #1e1e1e;
             border-radius: var(--radius-lg);
-            border: 2px dashed var(--border-color);
+            border: 2px dashed #444444;
+        }
+
+        .file-preview-text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            background: #1e1e1e;
+            border-radius: var(--radius-lg);
+            border: 2px dashed #444444;
         }
 
         .file-preview-file-icon {
             font-size: 64px;
             margin-bottom: 16px;
-            color: var(--text-secondary);
+            color: #888888;
         }
 
         .file-preview-file-name {
             font-size: 18px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: #ffffff;
             margin-bottom: 24px;
             word-break: break-word;
         }
@@ -2682,7 +2990,7 @@
 
         .file-preview-hint {
             font-size: 14px;
-            color: var(--text-secondary);
+            color: #888888;
             margin-top: 8px;
             font-style: italic;
         }
@@ -2693,7 +3001,7 @@
             align-items: center;
             justify-content: center;
             height: 200px;
-            color: var(--text-secondary);
+            color: #888888;
             font-size: 14px;
         }
 
@@ -2705,6 +3013,16 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-bottom: 12px;
+        }
+
+        .document-preview-body .loading-spinner {
+            margin: 20px auto;
+        }
+
+        .document-preview-body > div:last-child {
+            text-align: center;
+            color: #888888;
+            font-size: 14px;
         }
 
         @keyframes spin {
@@ -2721,6 +3039,7 @@
             color: var(--error-color);
             font-size: 14px;
             text-align: center;
+            background: #1e1e1e;
         }
 
         .word-preview-placeholder {
@@ -2731,6 +3050,165 @@
             height: 200px;
             text-align: center;
             padding: 20px;
+            background: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .document-preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #444444;
+        }
+
+        .document-preview-header h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .document-preview-controls {
+            display: flex;
+            gap: 12px;
+        }
+
+        .document-preview-body {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: var(--radius-md);
+            border: 1px solid #444444;
+        }
+
+        .word-preview-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-preview-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .text-preview-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pdf-preview-container {
+            flex: 1;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #1e1e1e;
+        }
+
+        .pdf-preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #1e1e1e;
+        }
+
+        .text-preview-container {
+            flex: 1;
+            border-radius: var(--radius-md);
+            overflow: auto;
+            border: 1px solid var(--border-color);
+            background: #1e1e1e;
+        }
+
+        .text-preview-text {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ffffff;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .word-preview-content .document-preview-body {
+            background: #1e1e1e;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+        }
+
+        .word-preview-content .document-preview-body h1,
+        .word-preview-content .document-preview-body h2,
+        .word-preview-content .document-preview-body h3,
+        .word-preview-content .document-preview-body h4,
+        .word-preview-content .document-preview-body h5,
+        .word-preview-content .document-preview-body h6 {
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+            color: #ffffff;
+        }
+
+        .word-preview-content .document-preview-body p {
+            margin-bottom: 1em;
+            color: #ffffff;
+        }
+
+        .word-preview-content .document-preview-body ul,
+        .word-preview-content .document-preview-body ol {
+            margin-bottom: 1em;
+            padding-left: 2em;
+            color: #ffffff;
+        }
+
+        .word-preview-content .document-preview-body table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 1em;
+        }
+
+        .word-preview-content .document-preview-body th,
+        .word-preview-content .document-preview-body td {
+            border: 1px solid #444444;
+            padding: 8px;
+            text-align: left;
+            color: #ffffff;
+        }
+
+        .word-preview-content .document-preview-body th {
+            background-color: #2d2d2d;
+            font-weight: 600;
+        }
+
+        .file-preview-modal-pdf {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            background: #1e1e1e;
+        }
+
+        .file-preview-modal-word {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            overflow: auto;
+            background: #1e1e1e;
+        }
+
+        .file-preview-modal-text {
+            width: 100%;
+            height: 70vh;
+            border: none;
+            overflow: auto;
+            background: #1e1e1e;
         }
 
         .file-preview-simple {
@@ -2741,9 +3219,9 @@
             height: 200px;
             text-align: center;
             padding: 20px;
-            background: var(--bg-secondary);
+            background: #1e1e1e;
             border-radius: var(--radius-lg);
-            border: 2px dashed var(--border-color);
+            border: 2px dashed #444444;
         }
 
         .pdf-page-info {
@@ -2761,13 +3239,13 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: white;
+            background: #1e1e1e;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-md);
             max-height: 70vh;
             overflow-y: auto;
             line-height: 1.6;
-            color: var(--text-primary);
+            color: #ffffff;
         }
 
         .word-preview-content h1,
@@ -2778,22 +3256,25 @@
         .word-preview-content h6 {
             margin-top: 24px;
             margin-bottom: 16px;
-            color: var(--text-primary);
+            color: #ffffff;
             font-weight: 600;
         }
 
         .word-preview-content p {
             margin-bottom: 16px;
+            color: #ffffff;
         }
 
         .word-preview-content ul,
         .word-preview-content ol {
             margin-bottom: 16px;
             padding-left: 24px;
+            color: #ffffff;
         }
 
         .word-preview-content li {
             margin-bottom: 8px;
+            color: #ffffff;
         }
 
         .word-preview-content table {
@@ -2805,17 +3286,18 @@
         .word-preview-content table,
         .word-preview-content th,
         .word-preview-content td {
-            border: 1px solid var(--border-color);
+            border: 1px solid #444444;
         }
 
         .word-preview-content th,
         .word-preview-content td {
             padding: 8px 12px;
             text-align: left;
+            color: #ffffff;
         }
 
         .word-preview-content th {
-            background: var(--bg-secondary);
+            background: #2d2d2d;
             font-weight: 600;
         }
         
@@ -3568,7 +4050,7 @@
                     </div>
                     
                     <div class="settings-copyright">
-                        <span class="app-version">ver. 6.0</span>
+                        <span class="app-version">ver. 7.0</span>
                         <span>12:21 Studio @ 2025</span>
                     </div>
                 </div>
@@ -4259,6 +4741,37 @@
             updateMoodleStatus('disconnected', 'Настройки сохранены');
         }
 
+        /**
+         * Безопасная функция для выполнения fetch запросов с улучшенной обработкой ошибок
+         */
+        async function safeFetch(url, options = {}) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 секунд таймаут
+                
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return response;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Превышено время ожидания запроса (30 сек)');
+                } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    throw new Error('Ошибка сети: проверьте подключение к интернету');
+                } else {
+                    throw error;
+                }
+            }
+        }
+
         async function testMoodleConnection() {
             const url = document.getElementById('moodle-url').value;
             const token = document.getElementById('moodle-token').value;
@@ -4272,31 +4785,42 @@
             
             try {
                 // Проверяем подключение к Moodle API
-                const response = await fetch(`${url}/webservice/rest/server.php?wstoken=${token}&wsfunction=core_webservice_get_site_info&moodlewsrestformat=json`);
+                const response = await safeFetch(`${url}/webservice/rest/server.php?wstoken=${token}&wsfunction=core_webservice_get_site_info&moodlewsrestformat=json`);
                 
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    if (data.errorcode) {
-                        throw new Error(data.message || 'Ошибка подключения к Moodle');
-                    }
-                    
-                    console.log('Успешное подключение к Moodle:', data);
-                    
-                    // Получаем список курсов
-                    await loadMoodleCourses();
-                    
-                    moodleConfig.connected = true;
-                    moodleConfig.siteInfo = data;
-                    saveData();
-                    
-                    updateMoodleStatus('connected', `Подключено к ${data.sitename || 'Moodle'}`);
-                } else {
-                    throw new Error('Не удалось подключиться к Moodle');
+                const data = await response.json();
+                
+                if (data.errorcode) {
+                    throw new Error(data.message || 'Ошибка подключения к Moodle');
                 }
+                
+                console.log('Успешное подключение к Moodle:', data);
+                
+                // Получаем список курсов
+                await loadMoodleCourses();
+                
+                moodleConfig.connected = true;
+                moodleConfig.siteInfo = data;
+                saveData();
+                
+                updateMoodleStatus('connected', `Подключено к ${data.sitename || 'Moodle'}`);
             } catch (error) {
                 console.error('Moodle connection error:', error);
-                updateMoodleStatus('error', `Ошибка: ${error.message}`);
+                let errorMessage = error.message;
+                
+                // Улучшенные сообщения об ошибках
+                if (errorMessage.includes('Failed to fetch')) {
+                    errorMessage = 'Ошибка сети: проверьте URL и подключение к интернету';
+                } else if (errorMessage.includes('timeout')) {
+                    errorMessage = 'Превышено время ожидания: сервер Moodle не отвечает';
+                } else if (errorMessage.includes('HTTP 401')) {
+                    errorMessage = 'Неверный токен: проверьте правильность токена';
+                } else if (errorMessage.includes('HTTP 403')) {
+                    errorMessage = 'Доступ запрещен: проверьте права токена';
+                } else if (errorMessage.includes('HTTP 404')) {
+                    errorMessage = 'URL не найден: проверьте правильность адреса Moodle';
+                }
+                
+                updateMoodleStatus('error', `Ошибка: ${errorMessage}`);
                 moodleConfig.connected = false;
                 saveData();
             }
@@ -4820,6 +5344,11 @@
                     break;
                 case 'error':
                     indicator.classList.add('error');
+                    // Добавляем анимацию для ошибок
+                    indicator.style.animation = 'shake 0.5s ease-in-out';
+                    setTimeout(() => {
+                        indicator.style.animation = '';
+                    }, 500);
                     break;
                 case 'loading':
                     indicator.classList.add('loading');
@@ -4830,6 +5359,9 @@
             }
             
             statusText.textContent = message;
+            
+            // Логируем статус для отладки
+            console.log(`Moodle Status: ${status} - ${message}`);
         }
 
         // Альтернативная функция для получения всех курсов
@@ -5735,13 +6267,13 @@
                         </div>
                         <div class="students-filters">
                             <div class="filter-buttons">
-                                <button class="filter-btn active" data-filter="all" onclick="filterByStatus('all')">
+                                <button class="filter-btn active" data-filter="all" onclick="toggleFilter('all')">
                                     Все
                                 </button>
-                                <button class="filter-btn" data-filter="submitted" onclick="filterByStatus('submitted')">
+                                <button class="filter-btn" data-filter="submitted" onclick="toggleFilter('submitted')">
                                     Сдано
                                 </button>
-                                <button class="filter-btn" data-filter="not-graded" onclick="filterByStatus('not-graded')">
+                                <button class="filter-btn" data-filter="not-graded" onclick="toggleFilter('not-graded')">
                                     Не оценено
                                 </button>
                             </div>
@@ -6466,103 +6998,108 @@
             // Обновляем контент
             const contentElement = document.getElementById('selected-student-content');
             
+            let contentHTML = '';
+            
             if (!student.submitted) {
-                contentElement.innerHTML = `
+                // Студент не сдал работу
+                contentHTML = `
                     <div class="no-submission-content">
                         <div class="no-submission-icon">📝</div>
                         <div class="no-submission-text">Студент не сдал работу</div>
                     </div>
                 `;
-                document.getElementById('selected-student-grading').style.display = 'none';
-                return;
-            }
-            
-            let contentHTML = '';
-            
-            // Текстовый ответ
-            if (student.submission_text) {
-                contentHTML += `
-                    <div class="submission-section">
-                        <h4>📝 Текстовый ответ</h4>
-                        <div class="submission-text-content">
-                            ${student.submission_text}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Файлы
-            if (student.submission_files && student.submission_files.length > 0) {
-                contentHTML += `
-                    <div class="submission-section">
-                        <div class="submission-files-header">
-                            <h4>Файлы ответа (${student.submission_files.length})</h4>
-                            ${student.submission_files.length > 1 ? `
-                                <button class="btn btn-secondary download-all-files-btn" onclick="downloadAllStudentFiles('${student.fullname}', ${JSON.stringify(student.submission_files).replace(/"/g, '&quot;')})" title="Скачать все файлы студента">
-                                    📥 Скачать все (${student.submission_files.length})
-                                </button>
-                            ` : ''}
-                        </div>
-                        <div class="submission-files-content">
-                            ${student.submission_files.map(file => `
-                                <div class="file-preview-item">
-                                    <div class="file-preview-content">
-                                        ${renderFilePreview(file)}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
+            } else {
+                // Студент сдал работу - показываем содержимое
                 
-                // Запускаем предзагрузку видео ПОСЛЕ отображения интерфейса
-                setTimeout(() => {
-                    preloadVideoFiles(student.submission_files);
-                }, 1000); // Задержка 1 секунда
-            } else if (student.hasFiles) {
-                contentHTML += `
-                    <div class="submission-section">
-                        <div class="submission-files-content">
-                            <div class="loading-files">⏳ Загрузка файлов...</div>
+                // Текстовый ответ
+                if (student.submission_text) {
+                    contentHTML += `
+                        <div class="submission-section">
+                            <h4>📝 Текстовый ответ</h4>
+                            <div class="submission-text-content">
+                                ${student.submission_text}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
+                
+                // Файлы
+                if (student.submission_files && student.submission_files.length > 0) {
+                    contentHTML += `
+                        <div class="submission-section">
+                            <div class="submission-files-header">
+                                <h4>Файлы ответа (${student.submission_files.length})</h4>
+                                ${student.submission_files.length > 1 ? `
+                                    <button class="btn btn-secondary download-all-files-btn" onclick="downloadAllStudentFiles('${student.fullname}', ${JSON.stringify(student.submission_files).replace(/"/g, '&quot;')})" title="Скачать все файлы студента">
+                                        📥 Скачать все (${student.submission_files.length})
+                                    </button>
+                                ` : ''}
+                            </div>
+                            <div class="submission-files-content">
+                                ${student.submission_files.map(file => `
+                                    <div class="file-preview-item">
+                                        <div class="file-preview-content">
+                                            ${renderFilePreview(file)}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Запускаем предзагрузку видео ПОСЛЕ отображения интерфейса
+                    setTimeout(() => {
+                        preloadVideoFiles(student.submission_files);
+                    }, 1000); // Задержка 1 секунда
+                } else if (student.hasFiles) {
+                    contentHTML += `
+                        <div class="submission-section">
+                            <div class="submission-files-content">
+                                <div class="loading-files" style="color: #888888; background: #1e1e1e; padding: 20px; text-align: center; border-radius: var(--radius-md);">⏳ Загрузка файлов...</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Добавляем блок "Нет ответа" если студент не сдал работу
+                if (!student.submission_text && (!student.submission_files || student.submission_files.length === 0)) {
+                    contentHTML += `
+                        <div class="no-submission-content">
+                            <div class="no-submission-icon">📝</div>
+                            <div class="no-submission-text">Нет ответа</div>
+                        </div>
+                    `;
+                }
             }
             
-            if (!student.submission_text && (!student.submission_files || student.submission_files.length === 0)) {
-                contentHTML = `
-                    <div class="no-submission-content">
-                        <div class="no-submission-icon">📝</div>
-                        <div class="no-submission-text">Нет ответа</div>
+            // Добавляем форму оценки в конце - ВСЕГДА показываем, независимо от статуса сдачи
+            contentHTML += `
+                <div class="grading-form ${!student.submitted ? 'no-submission-grading' : ''}">
+                    <div class="grading-input-group grade-group">
+                        <input type="text" id="student-grade-input" class="grade-input" 
+                               value="${student.grade || ''}" 
+                               placeholder="Оценка">
                     </div>
-                `;
-            }
-            
-                                      // Добавляем форму оценки в конце
-             if (student.submission_files && student.submission_files.length > 0) {
-                 contentHTML += `
-                     <div class="grading-form">
-                         <div class="grading-input-group grade-group">
-                             <label for="student-grade-input">Оценка:</label>
-                             <input type="text" id="student-grade-input" class="grade-input" 
-                                    value="${student.grade || ''}" 
-                                    placeholder="Введите оценку">
-                         </div>
-                         <div class="grading-input-group comment-group">
-                             <label for="student-comment-input">Комментарий:</label>
-                             <input type="text" id="student-comment-input" class="comment-input" 
-                                    placeholder="Краткий комментарий к работе" value="${student.comment || ''}">
-                         </div>
-                         <div class="grading-button-group">
-                             <button class="btn btn-primary" onclick="submitSelectedStudentGrade()">
-                                 💾 Сохранить оценку
-                             </button>
-                         </div>
+                    <div class="grading-input-group comment-group">
+                        <input type="text" id="student-comment-input" class="comment-input" 
+                               placeholder="Комментарий к работе" 
+                               value="${student.comment || ''}">
                     </div>
-                `;
-            }
+                    <div class="grading-button-group">
+                        <button class="btn btn-primary" onclick="submitSelectedStudentGrade()">
+                            💾 Сохранить
+                        </button>
+                    </div>
+                </div>
+            `;
             
             contentElement.innerHTML = contentHTML;
+            // Инициализируем отложенные предпросмотры (DOCX/TXT)
+            try {
+                initDeferredPreviews(contentElement);
+            } catch (e) {
+                console.error('Ошибка инициализации предпросмотра:', e);
+            }
             
             // Скрываем старую область оценки
             const gradingElement = document.getElementById('selected-student-grading');
@@ -6601,6 +7138,12 @@
                 fileType = 'pdf';
             } else if (['doc', 'docx'].includes(fileExtension)) {
                 fileType = 'word';
+            } else if (['txt', 'text', 'md', 'log', 'csv', 'json', 'xml', 'html', 'htm', 'css', 'js', 'py', 'java', 'cpp', 'c', 'h', 'php', 'rb', 'go', 'rs', 'swift', 'kt'].includes(fileExtension)) {
+                fileType = 'text';
+            } else if (['txt', 'text', 'md', 'log', 'csv', 'json', 'xml', 'html', 'htm', 'css', 'js', 'py', 'java', 'cpp', 'c', 'h', 'php', 'rb', 'go', 'rs', 'swift', 'kt'].includes(fileExtension)) {
+                fileType = 'text';
+            } else if (['txt', 'text', 'md', 'log', 'csv', 'json', 'xml', 'html', 'htm', 'css', 'js', 'py', 'java', 'cpp', 'c', 'h', 'php', 'rb', 'go', 'rs', 'swift', 'kt'].includes(fileExtension)) {
+                fileType = 'text';
             }
             
             if (fileType === 'video') {
@@ -6667,10 +7210,75 @@
                     </div>
                 `;
             } else if (fileType === 'pdf') {
-                // Для PDF файлов показываем простой плейсхолдер
+                // Мгновенно встраиваем предпросмотр PDF
                 return `
                     <div class="file-preview-large">
-                        <div class="file-preview-simple">
+                        <div class="file-preview-pdf-container deferred-pdf-preview" data-url="${fileUrl}" data-name="${fileName}">
+                            <div class="loading-spinner"></div>
+                            <div>Загружаем PDF...</div>
+                        </div>
+                        <div class="file-info">
+                            <h4>${fileName}</h4>
+                            <div class="file-details">
+                                <div class="file-details-info">
+                                    <span>Тип: PDF документ</span>
+                                    <span>Формат: PDF</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (fileType === 'word') {
+                // DOCX рендерим отложенно, DOC открываем через Google Viewer
+                if (fileExtension === 'doc') {
+                    const gviewUrl = `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(fileUrl)}`;
+                    return `
+                        <div class="file-preview-large">
+                            <div class="file-preview-pdf-container">
+                                <iframe src="${gviewUrl}" class="file-preview-pdf" title="DOC"></iframe>
+                            </div>
+                            <div class="file-info">
+                                <h4>${fileName}</h4>
+                                <div class="file-details">
+                                    <div class="file-details-info">
+                                        <span>Тип: Word документ</span>
+                                        <span>Формат: DOC</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                // DOCX – контейнер с отложенной загрузкой
+                return `
+                    <div class="file-preview-large">
+                        <div class="word-preview-content deferred-word-preview" data-url="${fileUrl}" data-name="${fileName}">
+                            <div class="document-preview-header"><h4>${fileName}</h4></div>
+                            <div class="document-preview-body">
+                                <div class="loading-spinner"></div>
+                                <div style="color: #888888;">Загружаем предпросмотр документа...</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (fileType === 'text') {
+                // Текст – контейнер с отложенной загрузкой
+                return `
+                    <div class="file-preview-large">
+                        <div class="text-preview-content deferred-text-preview" data-url="${fileUrl}" data-name="${fileName}">
+                            <div class="document-preview-header"><h4>${fileName}</h4></div>
+                                                    <div class="text-preview-container">
+                            <div class="loading-spinner"></div>
+                            <div style="color: #888888;">Загружаем предпросмотр текста...</div>
+                        </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Для всех остальных файлов показываем кнопку скачать
+                return `
+                    <div class="file-preview-large">
+                        <div class="file-preview-large-download">
                             <div class="file-preview-file-icon">📄</div>
                             <div class="file-preview-file-name">${fileName}</div>
                         </div>
@@ -6678,50 +7286,10 @@
                             <h4>${fileName}</h4>
                             <div class="file-details">
                                 <div class="file-details-info">
-                                    <span>Тип: PDF документ</span>
-                                    <span>Контейнер: ${fileExtension.toUpperCase()}</span>
+                                    <span>Тип: Неизвестный файл</span>
+                                    <span>Формат: ${fileExtension.toUpperCase()}</span>
                                 </div>
-                                <span class="download-link" onclick="downloadFile('${fileUrl}', '${fileName}')" title="Скачать PDF">Скачать</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else if (fileType === 'word') {
-                // Для Word файлов показываем простой плейсхолдер
-                return `
-                    <div class="file-preview-large">
-                        <div class="file-preview-simple">
-                            <div class="file-preview-file-icon">📝</div>
-                            <div class="file-preview-file-name">${fileName}</div>
-                        </div>
-                        <div class="file-info">
-                            <h4>${fileName}</h4>
-                            <div class="file-details">
-                                <div class="file-details-info">
-                                    <span>Тип: Word документ</span>
-                                    <span>Контейнер: ${fileExtension.toUpperCase()}</span>
-                                </div>
-                                <span class="download-link" onclick="downloadFile('${fileUrl}', '${fileName}')" title="Скачать Word">Скачать</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                // Для всех остальных файлов показываем кнопку скачать
-                return `
-                                            <div class="file-preview-large">
-                            <div class="file-preview-large-download">
-                                <div class="file-preview-file-icon">📄</div>
-                                <div class="file-preview-file-name">${fileName}</div>
-                            </div>
-                        <div class="file-info">
-                            <h4>${fileName}</h4>
-                            <div class="file-details">
-                                <div class="file-details-info">
-                                    <span>Тип: Файл</span>
-                                    <span>Контейнер: ${fileExtension.toUpperCase()}</span>
-                                </div>
-                                <span class="download-link" onclick="downloadFile('${fileUrl}', '${fileName}')" title="Скачать файл">Скачать</span>
+                                <span class="download-link" onclick="downloadDocument('${fileUrl}', '${fileName}')" title="Скачать файл">Скачать</span>
                             </div>
                         </div>
                     </div>
@@ -6768,23 +7336,64 @@
                     </audio>
                 `;
             } else if (fileType === 'pdf') {
-                modalContent = `<iframe src="${url}" class="file-preview-modal-pdf" style="width: 100%; height: 70vh; border: none;"></iframe>`;
-            } else if (fileType === 'word') {
-                // Для Word файлов показываем кнопку предпросмотра
+                // Для PDF файлов сразу открываем предпросмотр
                 modalContent = `
-                    <div style="text-align: center; padding: 40px;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
-                        <div style="font-size: 18px; margin-bottom: 16px;">${name}</div>
-                        <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 16px;">
-                            <button class="btn btn-primary" onclick="previewWordDocument('${url}', '${name}')">
-                                👁️ Предпросмотр
-                            </button>
-                            <a href="${url}" download="${name}" class="btn btn-secondary">
-                                📥 Скачать
-                            </a>
+                    <div class="pdf-preview-content">
+                        <div class="document-preview-header">
+                            <h4>${name}</h4>
+                        </div>
+                        <div class="pdf-preview-container">
+                                                    <div class="loading-spinner"></div>
+                        <div style="color: #888888;">Загружаем предпросмотр PDF...</div>
                         </div>
                     </div>
                 `;
+                
+                // Автоматически запускаем предпросмотр PDF
+                setTimeout(() => {
+                    previewPdfDocument(url, name);
+                }, 100);
+            } else if (fileType === 'word') {
+                // Для Word файлов сразу открываем предпросмотр
+                modalContent = `
+                    <div class="word-preview-content">
+                        <div class="document-preview-header">
+                            <h4>${name}</h4>
+                        </div>
+                        <div class="document-preview-body">
+                            <div class="loading-spinner"></div>
+                            <div style="color: #888888;">Загружаем предпросмотр документа...</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Автоматически запускаем предпросмотр Word
+                setTimeout(() => {
+                    previewWordDocument(url, name);
+                }, 100);
+            } else if (fileType === 'text') {
+                // Для текстовых файлов сразу открываем предпросмотр
+                modalContent = `
+                    <div class="text-preview-content">
+                        <div class="document-preview-header">
+                            <h4>${name}</h4>
+                            <div class="document-preview-controls">
+                                <button class="btn btn-secondary" onclick="downloadDocument('${url}', '${name}')">
+                                    📥 Скачать оригинал
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-preview-container">
+                                                            <div class="loading-spinner"></div>
+                                <div style="color: #888888;">Загружаем предпросмотр текста...</div>
+                        </div>
+                    </div>
+                `;
+                
+                // Автоматически запускаем предпросмотр текста
+                setTimeout(() => {
+                    previewTextDocument(url, name);
+                }, 100);
             } else {
                 modalContent = `
                     <div style="text-align: center; padding: 40px;">
@@ -6818,13 +7427,17 @@
                     <div class="file-preview-modal-footer">
                         <div class="file-preview-grading-form">
                             <div class="grading-input-group">
-                                <label for="modal-grade-input">Оценка:</label>
                                 <input type="number" id="modal-grade-input" class="grade-input" 
                                        min="0" max="100" step="0.01" value="${currentGrade}" 
-                                       placeholder="Введите оценку">
+                                       placeholder="Оценка">
+                            </div>
+                            <div class="grading-input-group">
+                                <input type="text" id="modal-comment-input" class="comment-input" 
+                                       placeholder="Комментарий к работе" 
+                                       value="${currentStudent ? (currentStudent.comment || '') : ''}">
                             </div>
                             <button class="btn btn-primary" onclick="saveGradeFromModal()">
-                                💾 Сохранить оценку
+                                💾 Сохранить
                             </button>
                         </div>
                     </div>
@@ -7026,9 +7639,6 @@
             console.log(`👁️ Предпросмотр Word документа: ${fileName}`);
             
             try {
-                // Показываем уведомление о загрузке
-                showNotification(`Загружаем предпросмотр документа ${fileName}...`, 'info');
-                
                 // Получаем файл
                 const token = document.getElementById('moodle-token')?.value;
                 let url = fileUrl;
@@ -7044,12 +7654,100 @@
                 
                 const arrayBuffer = await response.arrayBuffer();
                 
-                // Конвертируем Word в HTML
-                const mammoth = require('mammoth');
+                // Конвертируем Word в HTML (через preload) с веб-фолбэком
+                let mammoth = window.libs?.mammoth;
+                if (!mammoth) {
+                    mammoth = await loadMammothFromCdn();
+                }
                 const result = await mammoth.convertToHtml({ arrayBuffer });
                 
                 if (result.messages.length > 0) {
                     console.log('⚠️ Предупреждения при конвертации:', result.messages);
+                }
+                
+                // Встраиваем в карточку ответа (без модалки)
+                let container = null;
+                const candidates = document.querySelectorAll('.deferred-word-preview');
+                candidates.forEach(node => {
+                    if (!container && node.getAttribute('data-name') === fileName) {
+                        container = node;
+                    }
+                });
+                if (!container && candidates.length > 0) {
+                    container = candidates[candidates.length - 1];
+                }
+                if (!container) {
+                    throw new Error('Контейнер предпросмотра не найден');
+                }
+                const body = container.querySelector('.document-preview-body');
+                if (body) {
+                    body.innerHTML = result.value;
+                }
+                console.log(`✅ Предпросмотр Word документа ${fileName} загружен`);
+                
+            } catch (error) {
+                console.error(`❌ Ошибка при предпросмотре Word документа ${fileName}:`, error);
+                showNotification(`Не удалось отобразить DOCX: ${error.message}`, 'error');
+            }
+        }
+
+        // Загружает браузерную сборку mammoth при отсутствии модуля из preload
+        async function loadMammothFromCdn() {
+            if (window.mammoth) return window.mammoth;
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js';
+                script.async = true;
+                script.onload = () => resolve();
+                script.onerror = (e) => reject(new Error('Не удалось загрузить mammoth.browser'));
+                document.head.appendChild(script);
+            });
+            return window.mammoth;
+        }
+
+        // Инициирует отложенные предпросмотры в карточке
+        function initDeferredPreviews(scope) {
+            const wordNodes = scope.querySelectorAll('.deferred-word-preview');
+            wordNodes.forEach(node => {
+                const url = node.getAttribute('data-url');
+                const name = node.getAttribute('data-name');
+                previewWordDocument(url, name);
+            });
+            const pdfNodes = scope.querySelectorAll('.deferred-pdf-preview');
+            pdfNodes.forEach(async node => {
+                const url = node.getAttribute('data-url');
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    const blob = await res.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    node.innerHTML = `<iframe src="${blobUrl}" class="file-preview-pdf" title="PDF"></iframe>`;
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 300000);
+                } catch (e) {
+                    node.innerHTML = `<div class='file-preview-error'>Не удалось загрузить PDF</div>`;
+                }
+            });
+            const textNodes = scope.querySelectorAll('.deferred-text-preview');
+            textNodes.forEach(node => {
+                const url = node.getAttribute('data-url');
+                const name = node.getAttribute('data-name');
+                previewTextDocument(url, name);
+            });
+        }
+
+        async function previewPdfDocument(fileUrl, fileName) {
+            console.log(`👁️ Предпросмотр PDF документа: ${fileName}`);
+            
+            try {
+                // Показываем уведомление о загрузке
+                showNotification(`Загружаем предпросмотр PDF ${fileName}...`, 'info');
+                
+                // Получаем файл
+                const token = document.getElementById('moodle-token')?.value;
+                let url = fileUrl;
+                if (token && !url.includes('token=')) {
+                    const separator = url.includes('?') ? '&' : '?';
+                    url += `${separator}token=${token}`;
                 }
                 
                 // Находим текущее модальное окно и заменяем содержимое
@@ -7057,30 +7755,120 @@
                 const modalBody = modal?.querySelector('.file-preview-modal-body');
                 
                 if (modal && modalBody) {
-                    modalBody.innerHTML = `
-                        <div class="word-preview-content">
-                            ${result.value}
-                        </div>
-                    `;
+                    const pdfContent = modalBody.querySelector('.pdf-preview-content');
+                    if (pdfContent) {
+                        const previewContainer = pdfContent.querySelector('.pdf-preview-container');
+                        if (previewContainer) {
+                            // Создаем blob URL для PDF
+                            const response = await fetch(url);
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+                            
+                            const blob = await response.blob();
+                            const blobUrl = URL.createObjectURL(blob);
+                            
+                            previewContainer.innerHTML = `
+                                <iframe src="${blobUrl}" class="pdf-preview-iframe" 
+                                        title="PDF Preview" 
+                                        onload="console.log('PDF загружен')"
+                                        onerror="console.error('Ошибка загрузки PDF')">
+                                </iframe>
+                            `;
+                            
+                            // Очищаем blob URL через некоторое время
+                            setTimeout(() => {
+                                URL.revokeObjectURL(blobUrl);
+                            }, 300000); // 5 минут
+                        }
+                    }
                     
-                    console.log(`✅ Предпросмотр Word документа ${fileName} загружен`);
-                    showNotification(`Предпросмотр документа ${fileName} загружен`, 'success');
+                    console.log(`✅ Предпросмотр PDF документа ${fileName} загружен`);
                     
                 } else {
                     throw new Error('Модальное окно не найдено');
                 }
                 
             } catch (error) {
-                console.error(`❌ Ошибка при предпросмотре Word документа ${fileName}:`, error);
-                showNotification(`Ошибка при предпросмотре документа ${fileName}. Попробуйте скачать файл.`, 'error');
+                console.error(`❌ Ошибка при предпросмотре PDF документа ${fileName}:`, error);
+                showNotification(`Ошибка при предпросмотре PDF ${fileName}. Попробуйте скачать файл.`, 'error');
                 
                 // Fallback: открываем в новой вкладке
                 try {
-                    window.open(fileUrl, '_blank');
-                    showNotification(`Документ ${fileName} открыт в новой вкладке`, 'info');
+                    await downloadDocument(fileUrl, fileName);
                 } catch (fallbackError) {
-                    console.error('Ошибка при открытии в новой вкладке:', fallbackError);
+                    console.error('Ошибка при скачивании файла:', fallbackError);
                 }
+            }
+        }
+
+        async function previewTextDocument(fileUrl, fileName) {
+            console.log(`👁️ Предпросмотр текстового документа: ${fileName}`);
+            
+            try {
+                // Получаем файл
+                const token = document.getElementById('moodle-token')?.value;
+                let url = fileUrl;
+                if (token && !url.includes('token=')) {
+                    const separator = url.includes('?') ? '&' : '?';
+                    url += `${separator}token=${token}`;
+                }
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const text = await response.text();
+                
+                // Находим текущее модальное окно и заменяем содержимое
+                const modal = document.querySelector('.file-preview-modal');
+                const modalBody = modal?.querySelector('.file-preview-modal-body');
+                
+                if (modal && modalBody) {
+                    const textContent = modalBody.querySelector('.text-preview-content');
+                    if (textContent) {
+                        const previewContainer = textContent.querySelector('.text-preview-container');
+                        if (previewContainer) {
+                            previewContainer.innerHTML = `<pre class="text-preview-text">${text}</pre>`;
+                        }
+                    }
+                    
+                    console.log(`✅ Предпросмотр текстового документа ${fileName} загружен`);
+                    
+                } else {
+                    throw new Error('Модальное окно не найдено');
+                }
+                
+            } catch (error) {
+                console.error(`❌ Ошибка при предпросмотре текстового документа ${fileName}:`, error);
+                showNotification(`Ошибка при предпросмотре текста ${fileName}. Попробуйте скачать файл.`, 'error');
+                
+                // Fallback: открываем в новой вкладке
+                try {
+                    await downloadDocument(fileUrl, fileName);
+                } catch (fallbackError) {
+                    console.error('Ошибка при скачивании файла:', fallbackError);
+                }
+            }
+        }
+
+        async function downloadDocument(fileUrl, fileName) {
+            try {
+                // Получаем токен для доступа к файлу
+                const token = document.getElementById('moodle-token')?.value;
+                let url = fileUrl;
+                if (token && !url.includes('token=')) {
+                    const separator = url.includes('?') ? '&' : '?';
+                    url += `${separator}token=${token}`;
+                }
+                
+                // Просто показываем уведомление о том, что файл уже открыт для просмотра
+                showNotification(`Файл ${fileName} уже открыт для просмотра`, 'info');
+                
+            } catch (error) {
+                console.error('Ошибка при работе с файлом:', error);
+                showNotification(`Ошибка при работе с файлом: ${error.message}`, 'error');
             }
         }
 
@@ -7146,13 +7934,15 @@
             }
             
             const gradeInput = document.getElementById('modal-grade-input');
+            const commentInput = document.getElementById('modal-comment-input');
             const grade = gradeInput.value;
+            const comment = commentInput.value;
             const studentIndex = moodleConfig.selectedStudentIndex;
             
             if (studentIndex !== undefined && grade !== '') {
                 const student = moodleConfig.currentAssignment.students[studentIndex];
-                console.log(`💾 Сохраняем оценку ${grade} для студента ${student.fullname}`);
-                submitStudentGrade(student.id, grade);
+                console.log(`💾 Сохраняем оценку ${grade} и комментарий для студента ${student.fullname}`);
+                submitStudentGrade(student.id, grade, comment);
                 
                 // Закрываем модальное окно
                 const modal = document.querySelector('.file-preview-modal');
@@ -7474,18 +8264,68 @@
                 showNotification(`Оценка ${finalGrade} сохранена для ${student.fullname}`, 'success');
                 
                 // Обновляем данные в локальных данных
-                    student.grade = finalGrade;
+                student.grade = finalGrade;
                 student.comment = comment;
-                    saveData();
-                    
-                    // Обновляем отображение в интерфейсе
-                    if (moodleConfig.selectedStudentIndex !== undefined) {
-                        selectStudent(moodleConfig.selectedStudentIndex);
-                    }
+                saveData();
+                
+                // Обновляем только поля оценки и комментария, НЕ весь интерфейс
+                const gradeInput = document.getElementById('student-grade-input');
+                const commentInput = document.getElementById('student-comment-input');
+                if (gradeInput) gradeInput.value = finalGrade;
+                if (commentInput) commentInput.value = comment;
+                
+                // Обновляем статус в списке студентов (если нужно)
+                updateStudentStatusInList(studentId, finalGrade);
                 
             } catch (error) {
                 console.error('❌ Ошибка сохранения оценки:', error);
                 showNotification(`Ошибка: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Обновляет статус студента в списке без обновления предпросмотра файла
+         */
+        function updateStudentStatusInList(studentId, grade) {
+            if (!moodleConfig.currentAssignment || !moodleConfig.currentAssignment.students) {
+                return;
+            }
+            
+            const student = moodleConfig.currentAssignment.students.find(s => s.id === studentId);
+            if (!student) return;
+            
+            // Обновляем статус в списке студентов
+            const studentListItems = document.querySelectorAll('.student-list-item');
+            studentListItems.forEach(item => {
+                const originalIdx = parseInt(item.getAttribute('data-original-index') || '-1', 10);
+                if (originalIdx === moodleConfig.selectedStudentIndex) {
+                    // Обновляем бейдж оценки
+                    const gradeBadge = item.querySelector('.grade-badge');
+                    if (gradeBadge) {
+                        if (grade) {
+                            gradeBadge.textContent = formatGrade(grade);
+                            gradeBadge.className = 'grade-badge';
+                        } else {
+                            gradeBadge.textContent = '🔴 Не оценено';
+                            gradeBadge.className = 'grade-badge not-graded';
+                        }
+                    }
+                }
+            });
+            
+            // Обновляем статус в заголовке деталей студента
+            const statusElement = document.getElementById('selected-student-status');
+            if (statusElement) {
+                const student = moodleConfig.currentAssignment.students[moodleConfig.selectedStudentIndex];
+                if (student) {
+                    statusElement.innerHTML = `
+                        <span class="status-badge ${student.submitted ? 'submitted' : 'not-submitted'}">
+                            ${student.submitted ? '✅ Сдано' : '❌ Не сдано'}
+                        </span>
+                        ${student.grade ? `<span class="grade-badge">${formatGrade(student.grade)}</span>` : '<span class="grade-badge not-graded">🔴 Не оценено</span>'}
+                        ${student.submission_files && student.submission_files.length > 0 ? `<span class="files-badge">📎 ${student.submission_files.length} файлов</span>` : ''}
+                    `;
+                }
             }
         }
 
@@ -7573,16 +8413,10 @@
         }
 
         /**
-         * Функция фильтрации студентов по статусу
+         * Функция переключения фильтров (множественный выбор)
          */
-        function filterByStatus(status) {
-            console.log('🔍 Фильтрация по статусу:', status);
-            
-            // Обновляем активную кнопку фильтра
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-filter="${status}"]`).classList.add('active');
+        function toggleFilter(filterType) {
+            console.log('🔍 Переключение фильтра:', filterType);
             
             if (!moodleConfig.currentAssignment || !moodleConfig.currentAssignment.students) {
                 return;
@@ -7591,18 +8425,45 @@
             const students = moodleConfig.currentAssignment.students;
             let filteredStudents = students;
             
-            // Применяем фильтр по статусу
-            switch (status) {
-                case 'submitted':
-                    filteredStudents = students.filter(student => student.submitted);
-                    break;
-                case 'not-graded':
-                    filteredStudents = students.filter(student => !student.grade);
-                    break;
-                case 'all':
-                default:
+            // Если выбран "Все", сбрасываем все фильтры
+            if (filterType === 'all') {
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector('[data-filter="all"]').classList.add('active');
+                filteredStudents = students;
+            } else {
+                // Убираем активный класс с "Все"
+                document.querySelector('[data-filter="all"]').classList.remove('active');
+                
+                // Переключаем выбранный фильтр
+                const filterBtn = document.querySelector(`[data-filter="${filterType}"]`);
+                filterBtn.classList.toggle('active');
+                
+                // Получаем все активные фильтры
+                const activeFilters = Array.from(document.querySelectorAll('.filter-btn.active')).map(btn => btn.getAttribute('data-filter'));
+                
+                // Применяем активные фильтры
+                if (activeFilters.length === 0) {
+                    // Если нет активных фильтров, показываем всех
+                    document.querySelector('[data-filter="all"]').classList.add('active');
                     filteredStudents = students;
-                    break;
+                } else {
+                    // Применяем комбинацию фильтров
+                    filteredStudents = students.filter(student => {
+                        let matches = true;
+                        
+                        if (activeFilters.includes('submitted')) {
+                            matches = matches && student.submitted;
+                        }
+                        
+                        if (activeFilters.includes('not-graded')) {
+                            matches = matches && !student.grade;
+                        }
+                        
+                        return matches;
+                    });
+                }
             }
             
             // Применяем текущий поисковый запрос
@@ -7622,15 +8483,13 @@
             if (studentsList) {
                 studentsList.innerHTML = filteredStudents.map((student, index) => `
                     <div class="student-list-item" data-original-index="${students.indexOf(student)}" onclick="selectStudentByOriginalIndex(${students.indexOf(student)})">
-                        <div class="student-list-info">
-                            <div class="student-list-name">${student.fullname}</div>
-                            <div class="student-list-status">
-                                <span class="status-badge ${student.submitted ? 'submitted' : 'not-submitted'}">
-                                    ${student.submitted ? '✅ Сдано' : '❌ Не сдано'}
-                                </span>
-                                ${student.grade ? `<span class="grade-badge">${formatGrade(student.grade)}</span>` : '<span class="grade-badge not-graded">🔴 Не оценено</span>'}
-                                ${student.submission_files && student.submission_files.length > 0 ? `<span class="files-badge">📎 ${student.submission_files.length}</span>` : ''}
-                            </div>
+                        <div class="student-list-name">${student.fullname}</div>
+                        <div class="student-list-status">
+                            <span class="status-badge ${student.submitted ? 'submitted' : 'not-submitted'}">
+                                ${student.submitted ? '✅ Сдано' : '❌ Не сдано'}
+                            </span>
+                            ${student.grade ? `<span class="grade-badge">${formatGrade(student.grade)}</span>` : '<span class="grade-badge not-graded">🔴 Не оценено</span>'}
+                            ${student.submission_files && student.submission_files.length > 0 ? `<span class="files-badge">📎 ${student.submission_files.length}</span>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -8734,4 +9593,5 @@
 
     </script>
 </body>
+</html> 
 </html> 
