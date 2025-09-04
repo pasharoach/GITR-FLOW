@@ -4746,13 +4746,54 @@
          */
         async function safeFetch(url, options = {}) {
             try {
+                // Специальные настройки для Intel macOS
+                const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+                const isIntelMac = isMac && navigator.userAgent.includes('Intel');
+                
+                // Для Intel macOS сразу используем XMLHttpRequest
+                if (isIntelMac) {
+                    console.log('🍎 Intel macOS: используем XMLHttpRequest для лучшей совместимости');
+                    return await new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('GET', url, true);
+                        xhr.timeout = 30000;
+                        xhr.withCredentials = false;
+                        
+                        xhr.onload = function() {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                resolve({
+                                    ok: true,
+                                    status: xhr.status,
+                                    statusText: xhr.statusText,
+                                    json: () => Promise.resolve(JSON.parse(xhr.responseText))
+                                });
+                            } else {
+                                reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+                            }
+                        };
+                        
+                        xhr.onerror = function() {
+                            reject(new Error('Ошибка сети XMLHttpRequest'));
+                        };
+                        
+                        xhr.ontimeout = function() {
+                            reject(new Error('Таймаут XMLHttpRequest'));
+                        };
+                        
+                        xhr.send();
+                    });
+                }
+                
+                // Для остальных платформ используем обычный fetch
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 секунд таймаут
                 
-                const response = await fetch(url, {
+                let fetchOptions = {
                     ...options,
                     signal: controller.signal
-                });
+                };
+                
+                const response = await fetch(url, fetchOptions);
                 
                 clearTimeout(timeoutId);
                 
@@ -4765,7 +4806,66 @@
                 if (error.name === 'AbortError') {
                     throw new Error('Превышено время ожидания запроса (30 сек)');
                 } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-                    throw new Error('Ошибка сети: проверьте подключение к интернету');
+                    // Специальная обработка для Intel macOS
+                    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+                    const isIntelMac = isMac && navigator.userAgent.includes('Intel');
+                    
+                    if (isIntelMac) {
+                        console.log('🍎 Intel macOS: ошибка сети, пробуем XMLHttpRequest');
+                        // Попробуем XMLHttpRequest для Intel macOS
+                        try {
+                            const response = await new Promise((resolve, reject) => {
+                                const xhr = new XMLHttpRequest();
+                                xhr.open('GET', url, true);
+                                xhr.timeout = 30000;
+                                xhr.withCredentials = false;
+                                
+                                xhr.onload = function() {
+                                    if (xhr.status >= 200 && xhr.status < 300) {
+                                        resolve({
+                                            ok: true,
+                                            status: xhr.status,
+                                            statusText: xhr.statusText,
+                                            json: () => Promise.resolve(JSON.parse(xhr.responseText))
+                                        });
+                                    } else {
+                                        reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+                                    }
+                                };
+                                
+                                xhr.onerror = function() {
+                                    reject(new Error('Ошибка сети XMLHttpRequest'));
+                                };
+                                
+                                xhr.ontimeout = function() {
+                                    reject(new Error('Таймаут XMLHttpRequest'));
+                                };
+                                
+                                xhr.send();
+                            });
+                            return response;
+                        } catch (retryError) {
+                            console.log('🍎 Intel macOS: XMLHttpRequest тоже не сработал, пробуем fetch с другими настройками');
+                            // Последняя попытка с fetch
+                            try {
+                                const response = await fetch(url, {
+                                    method: 'GET',
+                                    mode: 'cors',
+                                    credentials: 'omit',
+                                    cache: 'no-cache',
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json'
+                                    }
+                                });
+                                return response;
+                            } catch (finalError) {
+                                throw new Error('Intel macOS: Все методы подключения не сработали. Проверьте настройки сети.');
+                            }
+                        }
+                    } else {
+                        throw new Error('Ошибка сети: проверьте подключение к интернету');
+                    }
                 } else {
                     throw error;
                 }
@@ -4781,7 +4881,16 @@
                 return;
             }
             
-            updateMoodleStatus('loading', 'Проверка подключения...');
+            // Специальная обработка для Intel macOS
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const isIntelMac = isMac && navigator.userAgent.includes('Intel');
+            
+            if (isIntelMac) {
+                console.log('🍎 Intel macOS: применяем специальную обработку для подключения к Moodle');
+                updateMoodleStatus('loading', 'Проверка подключения (Intel macOS)...');
+            } else {
+                updateMoodleStatus('loading', 'Проверка подключения...');
+            }
             
             try {
                 // Проверяем подключение к Moodle API
@@ -4806,6 +4915,14 @@
             } catch (error) {
                 console.error('Moodle connection error:', error);
                 let errorMessage = error.message;
+                
+                // Специальная обработка для Intel macOS
+                if (isIntelMac) {
+                    console.log('🍎 Intel macOS: обрабатываем ошибку подключения');
+                    if (errorMessage.includes('ERR_ADDRESS_UNREACHABLE') || errorMessage.includes('Failed to fetch')) {
+                        errorMessage = 'Intel macOS: Ошибка сети. Попробуйте перезапустить приложение или проверьте настройки сети.';
+                    }
+                }
                 
                 // Улучшенные сообщения об ошибках
                 if (errorMessage.includes('Failed to fetch')) {
