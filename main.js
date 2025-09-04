@@ -10,11 +10,25 @@ if (process.platform === 'darwin' && process.arch === 'x64') {
   app.commandLine.appendSwitch('--ignore-ssl-errors');
   app.commandLine.appendSwitch('--allow-running-insecure-content');
   app.commandLine.appendSwitch('--disable-web-security');
+  app.commandLine.appendSwitch('--no-sandbox');
   
-  // Настройки для лучшей совместимости с Intel
+  // Дополнительные настройки для решения проблем с сетью
   app.commandLine.appendSwitch('--disable-features', 'VizDisplayCompositor');
   app.commandLine.appendSwitch('--enable-gpu-rasterization');
-  app.commandLine.appendSwitch('--no-sandbox');
+  app.commandLine.appendSwitch('--disable-background-timer-throttling');
+  app.commandLine.appendSwitch('--disable-backgrounding-occluded-windows');
+  app.commandLine.appendSwitch('--disable-renderer-backgrounding');
+  app.commandLine.appendSwitch('--disable-ipc-flooding-protection');
+  
+  // Настройки для обхода блокировок сети
+  app.commandLine.appendSwitch('--disable-extensions');
+  app.commandLine.appendSwitch('--disable-plugins');
+  app.commandLine.appendSwitch('--disable-default-apps');
+  app.commandLine.appendSwitch('--disable-sync');
+  
+  // Принудительное использование HTTP/1.1
+  app.commandLine.appendSwitch('--disable-http2');
+  app.commandLine.appendSwitch('--disable-quic');
 }
 
 let mainWindow;
@@ -34,7 +48,9 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
       webSecurity: process.arch !== 'x64', // Отключаем для Intel macOS
-      allowRunningInsecureContent: process.arch === 'x64' // Разрешаем для Intel macOS
+      allowRunningInsecureContent: process.arch === 'x64', // Разрешаем для Intel macOS
+      experimentalFeatures: process.arch === 'x64', // Включаем экспериментальные функции для Intel
+      enableRemoteModule: process.arch === 'x64' // Разрешаем удаленный модуль для Intel
     },
     show: false
   };
@@ -74,8 +90,13 @@ function createWindow() {
   // Обработка сертификатов для macOS
   mainWindow.webContents.on('certificate-error', (event, url, error, certificate, callback) => {
     console.log('🔒 Ошибка сертификата:', error, url);
-    // Для разработки - игнорируем ошибки сертификатов
-    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+    
+    // Для Intel macOS - игнорируем все ошибки сертификатов
+    if (process.arch === 'x64') {
+      console.log('🍎 Intel macOS: игнорируем ошибку сертификата');
+      event.preventDefault();
+      callback(true);
+    } else if (url.includes('localhost') || url.includes('127.0.0.1')) {
       event.preventDefault();
       callback(true);
     } else {
@@ -261,8 +282,16 @@ ipcMain.handle('download-file-to-folder', async (event, fileUrl, fileName, stude
     const isHttps = finalUrl.startsWith('https://');
     const client = isHttps ? https : http;
     
+    // Специальные настройки для Intel macOS
+    const requestOptions = {};
+    if (process.arch === 'x64') {
+      console.log('🍎 Intel macOS: применяем специальные настройки для скачивания');
+      requestOptions.rejectUnauthorized = false; // Игнорируем ошибки сертификатов
+      requestOptions.agent = false; // Отключаем агент
+    }
+    
     return new Promise((resolve, reject) => {
-      const request = client.get(finalUrl, (response) => {
+      const request = client.get(finalUrl, requestOptions, (response) => {
         if (response.statusCode === 200) {
           const fileStream = fs.createWriteStream(filePath);
           response.pipe(fileStream);
