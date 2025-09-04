@@ -1,6 +1,22 @@
 const { app, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } = require('electron');
 const path = require('path');
 
+// Специальные настройки для macOS Intel
+if (process.platform === 'darwin' && process.arch === 'x64') {
+  console.log('🍎 Обнаружен macOS Intel, применяем специальные настройки для сети...');
+  
+  // Отключаем проверку сертификатов для Intel macOS
+  app.commandLine.appendSwitch('--ignore-certificate-errors');
+  app.commandLine.appendSwitch('--ignore-ssl-errors');
+  app.commandLine.appendSwitch('--allow-running-insecure-content');
+  app.commandLine.appendSwitch('--disable-web-security');
+  
+  // Настройки для лучшей совместимости с Intel
+  app.commandLine.appendSwitch('--disable-features', 'VizDisplayCompositor');
+  app.commandLine.appendSwitch('--enable-gpu-rasterization');
+  app.commandLine.appendSwitch('--no-sandbox');
+}
+
 let mainWindow;
 
 function createWindow() {
@@ -16,7 +32,9 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      webSecurity: process.arch !== 'x64', // Отключаем для Intel macOS
+      allowRunningInsecureContent: process.arch === 'x64' // Разрешаем для Intel macOS
     },
     show: false
   };
@@ -40,6 +58,29 @@ function createWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+  });
+
+  // Обработка сетевых ошибок для macOS Intel
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.log('❌ Ошибка загрузки:', errorCode, errorDescription, validatedURL);
+    if (errorCode === -2) { // ERR_FAILED
+      console.log('🔧 Попытка перезагрузки из-за сетевой ошибки...');
+      setTimeout(() => {
+        mainWindow.reload();
+      }, 2000);
+    }
+  });
+
+  // Обработка сертификатов для macOS
+  mainWindow.webContents.on('certificate-error', (event, url, error, certificate, callback) => {
+    console.log('🔒 Ошибка сертификата:', error, url);
+    // Для разработки - игнорируем ошибки сертификатов
+    if (url.includes('localhost') || url.includes('127.0.0.1')) {
+      event.preventDefault();
+      callback(true);
+    } else {
+      callback(false);
+    }
   });
 
   mainWindow.on('closed', () => {
@@ -157,8 +198,8 @@ app.whenReady().then(() => {
   // Настройка информации "О программе"
       app.setAboutPanelOptions({
         applicationName: 'ГИТР FLOW',
-        applicationVersion: '6.0.0',
-        version: '6.0.0',
+        applicationVersion: '7.0.0',
+        version: '7.0.0',
         copyright: '12:21 Studio @ 2025\ndigital@gitr.ru'
     });
   
