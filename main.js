@@ -3,8 +3,6 @@ const path = require('path');
 
 // Специальные настройки для macOS Intel
 if (process.platform === 'darwin' && process.arch === 'x64') {
-  console.log('🍎 Обнаружен macOS Intel, применяем специальные настройки для сети...');
-  
   // Отключаем проверку сертификатов для Intel macOS
   app.commandLine.appendSwitch('--ignore-certificate-errors');
   app.commandLine.appendSwitch('--ignore-ssl-errors');
@@ -78,9 +76,7 @@ function createWindow() {
 
   // Обработка сетевых ошибок для macOS Intel
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-    console.log('❌ Ошибка загрузки:', errorCode, errorDescription, validatedURL);
     if (errorCode === -2) { // ERR_FAILED
-      console.log('🔧 Попытка перезагрузки из-за сетевой ошибки...');
       setTimeout(() => {
         mainWindow.reload();
       }, 2000);
@@ -89,11 +85,8 @@ function createWindow() {
 
   // Обработка сертификатов для macOS
   mainWindow.webContents.on('certificate-error', (event, url, error, certificate, callback) => {
-    console.log('🔒 Ошибка сертификата:', error, url);
-    
     // Для Intel macOS - игнорируем все ошибки сертификатов
     if (process.arch === 'x64') {
-      console.log('🍎 Intel macOS: игнорируем ошибку сертификата');
       event.preventDefault();
       callback(true);
     } else if (url.includes('localhost') || url.includes('127.0.0.1')) {
@@ -219,8 +212,8 @@ app.whenReady().then(() => {
   // Настройка информации "О программе"
       app.setAboutPanelOptions({
         applicationName: 'ГИТР FLOW',
-        applicationVersion: '7.0.0',
-        version: '7.0.0',
+        applicationVersion: '7.1.0',
+        version: '7.1.0',
         copyright: '12:21 Studio @ 2025\ndigital@gitr.ru'
     });
   
@@ -259,6 +252,83 @@ ipcMain.handle('select-download-folder', async () => {
   }
 });
 
+// IPC обработчик для выполнения HTTP запросов (специально для Intel macOS)
+ipcMain.handle('make-http-request', async (event, url, options = {}) => {
+  try {
+    const https = require('https');
+    const http = require('http');
+    const { URL } = require('url');
+    
+    const parsedUrl = new URL(url);
+    const isHttps = parsedUrl.protocol === 'https:';
+    const client = isHttps ? https : http;
+    
+    // Специальные настройки для Intel macOS
+    const requestOptions = {
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port || (isHttps ? 443 : 80),
+      path: parsedUrl.pathname + parsedUrl.search,
+      method: options.method || 'GET',
+      timeout: 30000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'ru-RU,ru;q=0.9,en;q=0.8',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        ...options.headers
+      }
+    };
+    
+    // Для Intel macOS отключаем проверку сертификатов
+    if (process.arch === 'x64' && isHttps) {
+      requestOptions.rejectUnauthorized = false;
+    }
+    
+    return new Promise((resolve, reject) => {
+      const request = client.request(requestOptions, (response) => {
+        let data = '';
+        
+        response.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        response.on('end', () => {
+          resolve({
+            ok: response.statusCode >= 200 && response.statusCode < 300,
+            status: response.statusCode,
+            statusText: response.statusMessage,
+            text: () => Promise.resolve(data),
+            json: () => {
+              try {
+                return Promise.resolve(JSON.parse(data));
+              } catch (error) {
+                return Promise.resolve({ content: data });
+              }
+            }
+          });
+        });
+      });
+      
+      request.on('error', (error) => {
+        console.error('❌ Ошибка HTTP запроса:', error);
+        reject(new Error(`Ошибка сети: ${error.message}`));
+      });
+      
+      request.on('timeout', () => {
+        request.destroy();
+        reject(new Error('Таймаут запроса'));
+      });
+      
+      request.end();
+    });
+    
+  } catch (error) {
+    console.error('Ошибка при выполнении HTTP запроса:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // IPC обработчик для скачивания файла в указанную папку
 ipcMain.handle('download-file-to-folder', async (event, fileUrl, fileName, studentName, downloadFolder, moodleToken) => {
   try {
@@ -285,7 +355,6 @@ ipcMain.handle('download-file-to-folder', async (event, fileUrl, fileName, stude
     // Специальные настройки для Intel macOS
     const requestOptions = {};
     if (process.arch === 'x64') {
-      console.log('🍎 Intel macOS: применяем специальные настройки для скачивания');
       requestOptions.rejectUnauthorized = false; // Игнорируем ошибки сертификатов
       requestOptions.agent = false; // Отключаем агент
     }
@@ -298,7 +367,6 @@ ipcMain.handle('download-file-to-folder', async (event, fileUrl, fileName, stude
           
           fileStream.on('finish', () => {
             fileStream.close();
-            console.log(`✅ Файл ${safeFileName} успешно скачан в ${downloadFolder}`);
             resolve({ success: true, filePath: filePath });
           });
           

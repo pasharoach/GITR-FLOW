@@ -42,7 +42,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // Скачивание файла в указанную папку
   downloadFileToFolder: (fileUrl, fileName, studentName, downloadFolder, moodleToken) => 
-    ipcRenderer.invoke('download-file-to-folder', fileUrl, fileName, studentName, downloadFolder, moodleToken)
+    ipcRenderer.invoke('download-file-to-folder', fileUrl, fileName, studentName, downloadFolder, moodleToken),
+  
+  // HTTP запросы (специально для Intel macOS)
+  makeHttpRequest: (url, options) => ipcRenderer.invoke('make-http-request', url, options)
 }); 
 
 // Expose libraries to renderer safely
