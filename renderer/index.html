@@ -3841,6 +3841,124 @@
             border-color: var(--danger-hover);
         }
 
+        /* Update Modal Styles */
+        .update-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .update-content {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .update-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .update-title {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .update-body {
+            padding: 24px;
+        }
+
+        .update-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .update-icon {
+            font-size: 24px;
+        }
+
+        .update-message {
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .update-progress {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: var(--radius-sm);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .update-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .update-info {
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .version-info {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .version-info:last-child {
+            margin-bottom: 0;
+        }
+
+        .version-info strong {
+            color: var(--text-primary);
+        }
+
+        .version-info span {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
 
     </style>
 </head>
@@ -3973,7 +4091,7 @@
                 
                 <!-- Кнопка настроек в правом углу сайдбара -->
                 <div class="sidebar-settings-btn">
-                    <button class="btn-icon-small" id="sidebar-toggle-btn" title="Настройки">
+                    <button class="btn-icon-small" id="sidebar-toggle-btn" title="Настройки" onclick="toggleSettingsSidebar(); return false;">
                         ⚙️
                     </button>
             </div>
@@ -3988,7 +4106,7 @@
             <div class="settings-sidebar" id="settings-sidebar">
                 <div class="settings-header">
                     <h3>Настройки</h3>
-                    <button class="btn-icon" id="settings-close-btn">✕</button>
+                    <button class="btn-icon" id="settings-close-btn" onclick="toggleSettingsSidebar(); return false;">✕</button>
                 </div>
                 
                 <div class="settings-content">
@@ -4310,19 +4428,36 @@
             // ЯВНЫЕ обработчики кнопок настроек (дублируют делегирование на всякий случай)
             const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
             if (sidebarToggleBtn) {
-                sidebarToggleBtn.addEventListener('click', function(e) {
+                // Удаляем старые обработчики если есть
+                sidebarToggleBtn.removeEventListener('click', sidebarToggleBtn._settingsHandler);
+                
+                // Создаем новый обработчик
+                sidebarToggleBtn._settingsHandler = function(e) {
+                    console.log('🔧 Прямой клик по кнопке настроек!');
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     toggleSettingsSidebar();
-                });
+                };
+                
+                sidebarToggleBtn.addEventListener('click', sidebarToggleBtn._settingsHandler, true); // capture = true для приоритета
             }
+            
             const settingsCloseBtn = document.getElementById('settings-close-btn');
             if (settingsCloseBtn) {
-                settingsCloseBtn.addEventListener('click', function(e) {
+                // Удаляем старые обработчики если есть
+                settingsCloseBtn.removeEventListener('click', settingsCloseBtn._settingsHandler);
+                
+                // Создаем новый обработчик
+                settingsCloseBtn._settingsHandler = function(e) {
+                    console.log('🔧 Прямой клик по кнопке закрытия настроек!');
                     e.preventDefault();
                     e.stopPropagation();
+                    e.stopImmediatePropagation();
                     toggleSettingsSidebar();
-                });
+                };
+                
+                settingsCloseBtn.addEventListener('click', settingsCloseBtn._settingsHandler, true); // capture = true для приоритета
             }
 
             // Обновляем статус
@@ -8321,6 +8456,7 @@
                 // Добавляем комментарий, если он есть
                 if (commentText && commentText.trim()) {
                     console.log('📝 Добавляем комментарий к запросу');
+                    // Основной отзыв (Feedback) - только этот параметр работает
                     params.append('plugindata[assignfeedbackcomments_editor][text]', commentText.trim());
                     params.append('plugindata[assignfeedbackcomments_editor][format]', '1'); // 1 = HTML формат
                 }
@@ -9741,7 +9877,188 @@
             }
         }
 
+        // Функции для автоматического обновления
+        function openUpdateModal() {
+            document.getElementById('update-modal').style.display = 'flex';
+            // Получаем текущую версию приложения
+            window.electronAPI.getAppVersion().then(version => {
+                document.getElementById('current-version').textContent = version;
+            });
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('update-modal').style.display = 'none';
+        }
+
+        function checkForUpdates() {
+            const statusEl = document.getElementById('update-status');
+            const messageEl = statusEl.querySelector('.update-message');
+            const iconEl = statusEl.querySelector('.update-icon');
+            
+            iconEl.textContent = '🔄';
+            messageEl.textContent = 'Проверка обновлений...';
+            
+            window.electronAPI.checkForUpdates();
+        }
+
+        function downloadUpdate() {
+            const statusEl = document.getElementById('update-status');
+            const messageEl = statusEl.querySelector('.update-message');
+            const iconEl = statusEl.querySelector('.update-icon');
+            const progressEl = document.getElementById('update-progress');
+            const downloadBtn = document.getElementById('download-btn');
+            
+            iconEl.textContent = '📥';
+            messageEl.textContent = 'Загрузка обновления...';
+            progressEl.style.display = 'block';
+            downloadBtn.style.display = 'none';
+            
+            window.electronAPI.downloadUpdate();
+        }
+
+        function installUpdate() {
+            const statusEl = document.getElementById('update-status');
+            const messageEl = statusEl.querySelector('.update-message');
+            const iconEl = statusEl.querySelector('.update-icon');
+            
+            iconEl.textContent = '🔄';
+            messageEl.textContent = 'Перезапуск приложения...';
+            
+            window.electronAPI.installUpdate();
+        }
+
+        // Обработчики событий обновления
+        window.electronAPI.onUpdateStatus((data) => {
+            const statusEl = document.getElementById('update-status');
+            const messageEl = statusEl.querySelector('.update-message');
+            const iconEl = statusEl.querySelector('.update-icon');
+            const actionsEl = document.getElementById('update-actions');
+            const infoEl = document.getElementById('update-info');
+            const downloadBtn = document.getElementById('download-btn');
+            const installBtn = document.getElementById('install-btn');
+            const checkBtn = document.getElementById('check-btn');
+            const progressEl = document.getElementById('update-progress');
+            
+            messageEl.textContent = data.message;
+            
+            switch (data.status) {
+                case 'checking':
+                    iconEl.textContent = '🔄';
+                    actionsEl.style.display = 'none';
+                    progressEl.style.display = 'none';
+                    break;
+                    
+                case 'available':
+                    iconEl.textContent = '📦';
+                    document.getElementById('new-version').textContent = data.version;
+                    infoEl.style.display = 'block';
+                    actionsEl.style.display = 'flex';
+                    downloadBtn.style.display = 'inline-block';
+                    checkBtn.style.display = 'inline-block';
+                    progressEl.style.display = 'none';
+                    break;
+                    
+                case 'not-available':
+                    iconEl.textContent = '✅';
+                    actionsEl.style.display = 'flex';
+                    downloadBtn.style.display = 'none';
+                    installBtn.style.display = 'none';
+                    checkBtn.style.display = 'inline-block';
+                    progressEl.style.display = 'none';
+                    break;
+                    
+                case 'downloaded':
+                    iconEl.textContent = '✅';
+                    messageEl.textContent = data.message;
+                    actionsEl.style.display = 'flex';
+                    downloadBtn.style.display = 'none';
+                    installBtn.style.display = 'inline-block';
+                    checkBtn.style.display = 'inline-block';
+                    progressEl.style.display = 'none';
+                    break;
+                    
+                case 'error':
+                    iconEl.textContent = '❌';
+                    actionsEl.style.display = 'flex';
+                    downloadBtn.style.display = 'none';
+                    installBtn.style.display = 'none';
+                    checkBtn.style.display = 'inline-block';
+                    progressEl.style.display = 'none';
+                    break;
+            }
+        });
+
+        window.electronAPI.onUpdateProgress((data) => {
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            progressFill.style.width = data.percent + '%';
+            progressText.textContent = `${data.percent}%`;
+        });
+
+        // Добавляем пункт меню для проверки обновлений
+        document.addEventListener('DOMContentLoaded', function() {
+            // Добавляем кнопку обновления в меню приложения
+            const appMenu = document.querySelector('.app-menu');
+            if (appMenu) {
+                const updateMenuItem = document.createElement('div');
+                updateMenuItem.className = 'menu-item';
+                updateMenuItem.innerHTML = `
+                    <div class="menu-icon">🔄</div>
+                    <div class="menu-text">Обновления</div>
+                `;
+                updateMenuItem.onclick = openUpdateModal;
+                appMenu.appendChild(updateMenuItem);
+            }
+        });
+
     </script>
+
+    <!-- Модальное окно обновлений -->
+    <div id="update-modal" class="update-modal" style="display: none;">
+        <div class="update-content">
+            <div class="update-header">
+                <h2 class="update-title">Обновление приложения</h2>
+                <button class="close-btn" onclick="closeUpdateModal()">&times;</button>
+            </div>
+            
+            <div class="update-body">
+                <div id="update-status" class="update-status">
+                    <div class="update-icon">🔄</div>
+                    <div class="update-message">Проверка обновлений...</div>
+                </div>
+                
+                <div id="update-progress" class="update-progress" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">0%</div>
+                </div>
+                
+                <div id="update-actions" class="update-actions" style="display: none;">
+                    <button id="download-btn" class="btn btn-primary" onclick="downloadUpdate()" style="display: none;">
+                        Скачать обновление
+                    </button>
+                    <button id="install-btn" class="btn btn-success" onclick="installUpdate()" style="display: none;">
+                        Перезапустить и установить
+                    </button>
+                    <button id="check-btn" class="btn btn-secondary" onclick="checkForUpdates()">
+                        Проверить обновления
+                    </button>
+                </div>
+                
+                <div id="update-info" class="update-info" style="display: none;">
+                    <div class="version-info">
+                        <strong>Текущая версия:</strong> <span id="current-version"></span>
+                    </div>
+                    <div class="version-info">
+                        <strong>Новая версия:</strong> <span id="new-version"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html> 
 </html> 

@@ -45,7 +45,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('download-file-to-folder', fileUrl, fileName, studentName, downloadFolder, moodleToken),
   
   // HTTP запросы (специально для Intel macOS)
-  makeHttpRequest: (url, options) => ipcRenderer.invoke('make-http-request', url, options)
+  makeHttpRequest: (url, options) => ipcRenderer.invoke('make-http-request', url, options),
+  
+  // Автоматическое обновление
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  downloadUpdate: () => ipcRenderer.invoke('download-update'),
+  installUpdate: () => ipcRenderer.invoke('install-update'),
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+  
+  // События обновления
+  onUpdateStatus: (callback) => ipcRenderer.on('update-status', (event, data) => callback(data)),
+  onUpdateProgress: (callback) => ipcRenderer.on('update-progress', (event, data) => callback(data))
 }); 
 
 // Expose libraries to renderer safely

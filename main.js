@@ -1,4 +1,5 @@
 const { app, BrowserWindow, Menu, ipcMain, globalShortcut, dialog } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 
 // Специальные настройки для macOS Intel
@@ -30,6 +31,16 @@ if (process.platform === 'darwin' && process.arch === 'x64') {
 }
 
 let mainWindow;
+
+// Настройки для автоматического обновления
+autoUpdater.checkForUpdatesAndNotify();
+
+// Настройки для macOS Intel (игнорируем ошибки сертификатов)
+if (process.platform === 'darwin' && process.arch === 'x64') {
+  autoUpdater.requestHeaders = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+  };
+}
 
 function createWindow() {
   // Разные настройки для разных платформ
@@ -99,6 +110,85 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+  });
+
+  // Настройка автоматического обновления после создания окна
+  setupAutoUpdater();
+}
+
+// Настройка автоматического обновления
+function setupAutoUpdater() {
+  // Проверяем обновления при запуске (с задержкой 3 секунды)
+  setTimeout(() => {
+    autoUpdater.checkForUpdatesAndNotify();
+  }, 3000);
+
+  // События автоматического обновления
+  autoUpdater.on('checking-for-update', () => {
+    console.log('🔍 Проверка обновлений...');
+    if (mainWindow) {
+      mainWindow.webContents.send('update-status', { status: 'checking', message: 'Проверка обновлений...' });
+    }
+  });
+
+  autoUpdater.on('update-available', (info) => {
+    console.log('📦 Доступно обновление:', info.version);
+    if (mainWindow) {
+      mainWindow.webContents.send('update-status', { 
+        status: 'available', 
+        message: `Доступна новая версия ${info.version}`,
+        version: info.version,
+        releaseNotes: info.releaseNotes
+      });
+    }
+  });
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('✅ Обновления не найдены. Текущая версия:', info.version);
+    if (mainWindow) {
+      mainWindow.webContents.send('update-status', { 
+        status: 'not-available', 
+        message: 'У вас установлена последняя версия',
+        version: info.version
+      });
+    }
+  });
+
+  autoUpdater.on('error', (err) => {
+    console.error('❌ Ошибка при проверке обновлений:', err);
+    if (mainWindow) {
+      mainWindow.webContents.send('update-status', { 
+        status: 'error', 
+        message: `Ошибка проверки обновлений: ${err.message}`
+      });
+    }
+  });
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = "Скорость загрузки: " + progressObj.bytesPerSecond;
+    log_message = log_message + ' - Загружено ' + progressObj.percent + '%';
+    log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
+    console.log('📥 Загрузка обновления:', log_message);
+    
+    if (mainWindow) {
+      mainWindow.webContents.send('update-progress', {
+        percent: Math.round(progressObj.percent),
+        transferred: progressObj.transferred,
+        total: progressObj.total,
+        bytesPerSecond: progressObj.bytesPerSecond
+      });
+    }
+  });
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('✅ Обновление загружено:', info.version);
+    if (mainWindow) {
+      mainWindow.webContents.send('update-status', { 
+        status: 'downloaded', 
+        message: `Обновление ${info.version} загружено. Перезапустите приложение для установки.`,
+        version: info.version
+      });
+    }
   });
 }
 
@@ -212,8 +302,8 @@ app.whenReady().then(() => {
   // Настройка информации "О программе"
       app.setAboutPanelOptions({
         applicationName: 'ГИТР FLOW',
-        applicationVersion: '7.1.0',
-        version: '7.1.0',
+        applicationVersion: '7.2.0',
+        version: '7.2.0',
         copyright: '12:21 Studio @ 2025\ndigital@gitr.ru'
     });
   
@@ -231,6 +321,23 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+// IPC обработчики для автоматического обновления
+ipcMain.handle('check-for-updates', () => {
+  autoUpdater.checkForUpdatesAndNotify();
+});
+
+ipcMain.handle('download-update', () => {
+  autoUpdater.downloadUpdate();
+});
+
+ipcMain.handle('install-update', () => {
+  autoUpdater.quitAndInstall();
+});
+
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
 });
 
 // IPC обработчик для выбора папки скачивания
