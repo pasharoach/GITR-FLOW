@@ -4307,6 +4307,24 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 DOM загружен, приложение инициализируется...');
             
+            // ЯВНЫЕ обработчики кнопок настроек (дублируют делегирование на всякий случай)
+            const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+            if (sidebarToggleBtn) {
+                sidebarToggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSettingsSidebar();
+                });
+            }
+            const settingsCloseBtn = document.getElementById('settings-close-btn');
+            if (settingsCloseBtn) {
+                settingsCloseBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSettingsSidebar();
+                });
+            }
+
             // Обновляем статус
             const testStatus = document.getElementById('test-status');
             if (testStatus) {
@@ -4887,10 +4905,8 @@
             
             if (isIntelMac) {
                 console.log('🍎 Intel macOS: применяем специальную обработку для подключения к Moodle');
-                updateMoodleStatus('loading', 'Проверка подключения (Intel macOS)...');
-            } else {
-                updateMoodleStatus('loading', 'Проверка подключения...');
             }
+            updateMoodleStatus('loading', 'Проверка подключения...');
             
             try {
                 // Проверяем подключение к Moodle API
@@ -7938,7 +7954,8 @@
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
-                    text = await response.text();
+                    // Читаем сериализуемое поле body
+                    text = typeof response.body === 'string' ? response.body : (response.json?.content || '');
                 } else {
                     const response = await fetch(url);
                     if (!response.ok) {
@@ -7947,35 +7964,42 @@
                     text = await response.text();
                 }
                 
-                // Находим текущее модальное окно и заменяем содержимое
+                // Пытаемся найти контейнер: модальное окно или отложенный контейнер
+                let previewContainer = null;
                 const modal = document.querySelector('.file-preview-modal');
                 const modalBody = modal?.querySelector('.file-preview-modal-body');
-                
                 if (modal && modalBody) {
                     const textContent = modalBody.querySelector('.text-preview-content');
-                    if (textContent) {
-                        const previewContainer = textContent.querySelector('.text-preview-container');
-                        if (previewContainer) {
-                            previewContainer.innerHTML = `<pre class="text-preview-text">${text}</pre>`;
-                        }
-                    }
-                    
-                    console.log(`✅ Предпросмотр текстового документа ${fileName} загружен`);
-                    
-                } else {
-                    throw new Error('Модальное окно не найдено');
+                    previewContainer = textContent?.querySelector('.text-preview-container') || null;
                 }
+                if (!previewContainer) {
+                    const candidates = Array.from(document.querySelectorAll('.deferred-text-preview'));
+                    let containerNode = candidates.find(n => n.getAttribute('data-name') === fileName);
+                    if (!containerNode) {
+                        containerNode = candidates.find(n => (n.getAttribute('data-url') || '') === fileUrl);
+                    }
+                    if (!containerNode && candidates.length > 0) {
+                        containerNode = candidates[candidates.length - 1];
+                    }
+                    if (containerNode) {
+                        previewContainer = containerNode.querySelector('.text-preview-container');
+                    }
+                }
+                if (!previewContainer) {
+                    console.warn('Контейнер предпросмотра текста не найден');
+                    return;
+                }
+                // Безопасно вставляем текст, исключая интерпретацию HTML
+                const pre = document.createElement('pre');
+                pre.className = 'text-preview-text';
+                pre.textContent = text;
+                previewContainer.innerHTML = '';
+                previewContainer.appendChild(pre);
+                console.log(`✅ Предпросмотр текстового документа ${fileName} загружен`);
                 
             } catch (error) {
                 console.error(`❌ Ошибка при предпросмотре текстового документа ${fileName}:`, error);
-                showNotification(`Ошибка при предпросмотре текста ${fileName}. Попробуйте скачать файл.`, 'error');
-                
-                // Fallback: открываем в новой вкладке
-                try {
-                    await downloadDocument(fileUrl, fileName);
-                } catch (fallbackError) {
-                    console.error('Ошибка при скачивании файла:', fallbackError);
-                }
+                showNotification(`Ошибка при предпросмотре текста ${fileName}.`, 'error');
             }
         }
 

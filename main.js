@@ -294,18 +294,19 @@ ipcMain.handle('make-http-request', async (event, url, options = {}) => {
         });
         
         response.on('end', () => {
+          // Возвращаем только сериализуемые данные (без функций), иначе IPC бросает "An object could not be cloned"
+          let parsedJson = null;
+          try {
+            parsedJson = JSON.parse(data);
+          } catch (_) {
+            parsedJson = null;
+          }
           resolve({
             ok: response.statusCode >= 200 && response.statusCode < 300,
             status: response.statusCode,
             statusText: response.statusMessage,
-            text: () => Promise.resolve(data),
-            json: () => {
-              try {
-                return Promise.resolve(JSON.parse(data));
-              } catch (error) {
-                return Promise.resolve({ content: data });
-              }
-            }
+            body: data,
+            json: parsedJson
           });
         });
       });

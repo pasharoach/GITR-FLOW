@@ -42,22 +42,22 @@
       "gatekeeperAssess": false,
       "entitlements": null,
       "entitlementsInherit": null,
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        }
-      ]
+        "target": [
+          {
+            "target": "dmg",
+            "arch": [
+              "x64",
+              "arm64"
+            ]
+          },
+          {
+            "target": "zip",
+            "arch": [
+              "x64",
+              "arm64"
+            ]
+          }
+        ]
     },
     "dmg": {
       "contents": [
