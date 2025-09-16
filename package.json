@@ -1,6 +1,6 @@
 {
   "name": "gitr-flow",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "description": "ГИТР FLOW - Desktop application for grading Moodle assignments with file preview and comments",
   "main": "main.js",
   "scripts": {
@@ -32,7 +32,7 @@
   },
   "build": {
     "appId": "com.gitr.flow",
-    "productName": "ГИТР FLOW",
+    "productName": "gitr-flow",
     "icon": "assets/icon.icns",
     "directories": {
       "output": "dist"
