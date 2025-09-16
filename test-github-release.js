@@ -7,7 +7,7 @@ console.log('');
 const options = {
     hostname: 'api.github.com',
     port: 443,
-    path: '/repos/pasharoach/Notebook/releases',
+    path: '/repos/pasharoach/GITR-FLOW/releases',
     method: 'GET',
     headers: {
         'User-Agent': 'GITR-FLOW-Auto-Update-Test',
