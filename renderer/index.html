@@ -3960,6 +3960,55 @@
             font-weight: 500;
         }
 
+        /* Header Actions Styles */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .update-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 8px;
+            transition: var(--transition);
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .update-btn:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .update-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Update Section Styles */
+        .update-section {
+            margin-top: 20px;
+            padding: 16px;
+        }
+
+        .update-btn-container {
+            width: 100%;
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
     </style>
 </head>
 <body>
@@ -4073,9 +4122,6 @@
                             <strong>Запретить после:</strong> <span id="assignment-cutoff-date">—</span>
                     </div>
                 </div>
-                
-
-                
 
         </div>
         
@@ -4164,6 +4210,15 @@
                         <div class="setting-group">
                             <label>Комментарий 6 <span class="hotkey-hint">⌘ + 6</span></label>
                             <input type="text" id="template-6" placeholder="Введите шаблон комментария 6">
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопка проверки обновлений -->
+                    <div class="settings-section">
+                        <div class="setting-group">
+                            <button class="btn btn-secondary btn-full" onclick="openUpdateModal()">
+                                🔄 Проверить обновления
+                            </button>
                         </div>
                     </div>
                     
@@ -9884,6 +9939,11 @@
             window.electronAPI.getAppVersion().then(version => {
                 document.getElementById('current-version').textContent = version;
             });
+            
+            // Автоматически проверяем обновления при открытии модального окна
+            setTimeout(() => {
+                checkForUpdates();
+            }, 500);
         }
 
         function closeUpdateModal() {
@@ -9898,6 +9958,7 @@
             iconEl.textContent = '🔄';
             messageEl.textContent = 'Проверка обновлений...';
             
+            console.log('🔍 Запуск проверки обновлений...');
             window.electronAPI.checkForUpdates();
         }
 
@@ -10010,6 +10071,11 @@
                 updateMenuItem.onclick = openUpdateModal;
                 appMenu.appendChild(updateMenuItem);
             }
+        });
+
+        // Обработчик для открытия модального окна из меню
+        window.electronAPI.onOpenUpdateModal(() => {
+            openUpdateModal();
         });
 
     </script>

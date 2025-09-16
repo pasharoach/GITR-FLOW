@@ -55,7 +55,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   
   // События обновления
   onUpdateStatus: (callback) => ipcRenderer.on('update-status', (event, data) => callback(data)),
-  onUpdateProgress: (callback) => ipcRenderer.on('update-progress', (event, data) => callback(data))
+  onUpdateProgress: (callback) => ipcRenderer.on('update-progress', (event, data) => callback(data)),
+  
+  // События меню
+  onOpenUpdateModal: (callback) => ipcRenderer.on('open-update-modal', callback)
 }); 
 
 // Expose libraries to renderer safely

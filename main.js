@@ -202,6 +202,14 @@ function createMenu() {
           label: 'О приложении',
           role: 'about'
         },
+        {
+          label: 'Проверить обновления',
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.send('open-update-modal');
+            }
+          }
+        },
         { type: 'separator' },
         {
           label: 'Выход',
@@ -229,14 +237,6 @@ function createMenu() {
       label: 'Оценивание',
       submenu: [
         { 
-          label: 'Шаблоны комментариев', 
-          accelerator: process.platform === 'darwin' ? 'Cmd+T' : 'Ctrl+T',
-          click: () => {
-            mainWindow.webContents.send('open-templates-modal');
-          }
-        },
-        { type: 'separator' },
-        { 
           label: 'Горячие клавиши', 
           click: () => {
             mainWindow.webContents.send('open-hotkeys-modal');
@@ -258,8 +258,8 @@ function createMenu() {
 
   const menu = Menu.buildFromTemplate(template);
   
-  // Убираем меню для кастомного интерфейса на всех платформах
-  Menu.setApplicationMenu(null);
+  // Включаем меню для доступа к проверке обновлений
+  Menu.setApplicationMenu(menu);
 }
 
 // Регистрируем глобальную горячую клавишу для DevTools
@@ -302,8 +302,8 @@ app.whenReady().then(() => {
   // Настройка информации "О программе"
       app.setAboutPanelOptions({
         applicationName: 'ГИТР FLOW',
-        applicationVersion: '7.3.0',
-        version: '7.3.0',
+        applicationVersion: '8.0.0',
+        version: '8.0.0',
         copyright: '12:21 Studio @ 2025\ndigital@gitr.ru'
     });
   

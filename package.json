@@ -1,6 +1,6 @@
 {
   "name": "gitr-flow",
-  "version": "7.3.0",
+  "version": "8.0.0",
   "description": "ГИТР FLOW - Desktop application for grading Moodle assignments with file preview and comments",
   "main": "main.js",
   "scripts": {
