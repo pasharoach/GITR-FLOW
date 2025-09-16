@@ -302,8 +302,8 @@ app.whenReady().then(() => {
   // Настройка информации "О программе"
       app.setAboutPanelOptions({
         applicationName: 'ГИТР FLOW',
-        applicationVersion: '7.2.0',
-        version: '7.2.0',
+        applicationVersion: '7.1.0',
+        version: '7.1.0',
         copyright: '12:21 Studio @ 2025\ndigital@gitr.ru'
     });
   
